@@ -14,6 +14,8 @@ from gector.seq2labels_model import Seq2Labels
 from gector.trainer import Trainer
 from gector.tokenizer_indexer import PretrainedBertIndexer
 from utils.helpers import get_weights_name
+from nltk.tokenize import word_tokenize
+from postagging import PosTagger
 
 
 def fix_seed():
@@ -85,7 +87,6 @@ def get_model(model_name, vocab, tune_bert=False,
                        confidence=confidence)
     return model
 
-
 def main(args):
     fix_seed()
     if not os.path.exists(args.model_dir):
@@ -104,6 +105,27 @@ def main(args):
                              special_tokens_fix=args.special_tokens_fix)
     train_data = reader.read(args.train_set)
     dev_data = reader.read(args.dev_set)
+
+    def pos_tagger(inputs):
+
+        while len(inputs) != 0:
+            # READ USER INPUT SENTENCE
+            sent = inputs
+
+            # TOKENIZE INPUT SENTENCE
+            sent = word_tokenize(sent)
+
+            # LOAD TRAINED POS TAGGER
+            LOAD_PATH = '../model/postag_model.gz'
+            tagger = PosTagger(train_data=args.train_set, dev_data=args.dev_set)
+            tagger.load(LOAD_PATH)
+
+            # DISPLAY TAGGED SENTENCE
+            print(tagger.tag(sent))
+
+        return
+
+    pos_tagger(train_data)
 
     default_tokens = [DEFAULT_OOV_TOKEN, DEFAULT_PADDING_TOKEN]
     namespaces = ['labels', 'd_tags']

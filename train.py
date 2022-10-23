@@ -16,9 +16,6 @@ from gector.tokenizer_indexer import PretrainedBertIndexer
 from utils.helpers import get_weights_name
 from nltk.tokenize import word_tokenize
 import nltk
-from nltk import pos_tag
-from nltk import RegexpParser
-import nltk
 nltk.download('averaged_perceptron_tagger')
 
 
@@ -195,7 +192,7 @@ def main(args):
                               )
     iterator.index_with(vocab)
     val_iterator = BucketIterator(batch_size=args.batch_size,
-                                  sorting_keys=[("tokens", "num_tokens")], 
+                                  sorting_keys=[("tokens", "num_tokens")],
                                   instances_per_epoch=None)
     val_iterator.index_with(vocab)
 

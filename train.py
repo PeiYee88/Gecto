@@ -15,7 +15,12 @@ from gector.trainer import Trainer
 from gector.tokenizer_indexer import PretrainedBertIndexer
 from utils.helpers import get_weights_name
 from nltk.tokenize import word_tokenize
-from postagging import PosTagger
+import nltk
+from nltk import pos_tag
+from nltk import RegexpParser
+import nltk
+nltk.download('averaged_perceptron_tagger')
+
 
 
 def fix_seed():
@@ -103,29 +108,39 @@ def main(args):
                              tn_prob=args.tn_prob,
                              tp_prob=args.tp_prob,
                              special_tokens_fix=args.special_tokens_fix)
+
     train_data = reader.read(args.train_set)
     dev_data = reader.read(args.dev_set)
 
-    def pos_tagger(inputs):
+    def pos_tagger_and_tensor():
+        # read the training data in src format
+        f = open(args.postagger_train, "r")
+        pos_train = str(f.read())
+        #print(pos_train)
 
-        while len(inputs) != 0:
-            # READ USER INPUT SENTENCE
-            sent = inputs
+        tokens = word_tokenize(pos_train)
+        tags = nltk.pos_tag(tokens)
+        #print(tags)
 
-            # TOKENIZE INPUT SENTENCE
-            sent = word_tokenize(sent)
+        # a temporary list to store the string labels
+        temp_list = tags
 
-            # LOAD TRAINED POS TAGGER
-            LOAD_PATH = '../model/postag_model.gz'
-            tagger = PosTagger(train_data=args.train_set, dev_data=args.dev_set)
-            tagger.load(LOAD_PATH)
+        # dictionary that maps integer to its string value
+        label_dict = {}
 
-            # DISPLAY TAGGED SENTENCE
-            print(tagger.tag(sent))
+        # list to store integer labels
+        int_labels = []
 
-        return
+        for i in range(len(temp_list)):
+            label_dict[i] = temp_list[i]
+            int_labels.append(i)
 
-    pos_tagger(train_data)
+        train_y = torch.tensor(int_labels)
+        return train_y
+
+    int_label_tensor = pos_tagger_and_tensor()
+    #print(token_with_tags)
+    #torch.cat((int_label_tensor,train_data))
 
     default_tokens = [DEFAULT_OOV_TOKEN, DEFAULT_PADDING_TOKEN]
     namespaces = ['labels', 'd_tags']
@@ -221,6 +236,7 @@ if __name__ == '__main__':
                         help='Path to the dev data', required=True)
     parser.add_argument('--model_dir',
                         help='Path to the model dir', required=True)
+    parser.add_argument('--postagger_train', required=True)
     parser.add_argument('--vocab_path',
                         help='Path to the model vocabulary directory.'
                              'If not set then build vocab from data',

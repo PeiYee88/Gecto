@@ -139,8 +139,6 @@ def main(args):
         return train_y
 
     int_label_tensor = pos_tagger_and_tensor()
-    #print(token_with_tags)
-    #torch.cat((int_label_tensor,train_data))
 
     default_tokens = [DEFAULT_OOV_TOKEN, DEFAULT_PADDING_TOKEN]
     namespaces = ['labels', 'd_tags']

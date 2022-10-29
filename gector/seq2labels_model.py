@@ -92,6 +92,7 @@ class Seq2Labels(Model):
     @overrides
     def forward(self,  # type: ignore
                 tokens: Dict[str, torch.LongTensor],
+                pos_tags: Dict[str, torch.LongTensor],
                 labels: torch.LongTensor = None,
                 d_tags: torch.LongTensor = None,
                 metadata: List[Dict[str, Any]] = None) -> Dict[str, torch.Tensor]:
@@ -130,7 +131,14 @@ class Seq2Labels(Model):
             A scalar loss to be optimised.
 
         """
+
+        # QIAN: UPDATED THIS PORTION
         encoded_text = self.text_field_embedder(tokens)
+        encoded_pos_tag = self.text_field_embedder(pos_tags)
+
+        # just sum word embeddings + pos tag embeddings
+        encoded_text = encoded_text + encoded_pos_tag
+
         batch_size, sequence_length, _ = encoded_text.size()
         mask = get_text_field_mask(tokens)
         logits_labels = self.tag_labels_projection_layer(

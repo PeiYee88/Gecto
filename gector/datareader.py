@@ -11,6 +11,7 @@ from allennlp.data.instance import Instance
 from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
 from allennlp.data.tokenizers import Token
 from overrides import overrides
+import nltk
 
 from utils.helpers import SEQ_DELIMETERS, START_TOKEN
 
@@ -132,6 +133,16 @@ class Seq2LabelsDatasetReader(DatasetReader):
         fields: Dict[str, Field] = {}
         sequence = TextField(tokens, self._token_indexers)
         fields["tokens"] = sequence
+
+        # QIAN: ADDED THIS
+        pos_tags: List[Token] = []
+        for token in tokens:
+            word = token.text
+            pos_tag = nltk.pos_tag([word])[0][1]
+            pos_tags.append(Token(pos_tag))
+        pos_tag_sequence = TextField(pos_tags, self._token_indexers)
+        fields["pos_tags"] = pos_tag_sequence
+
         fields["metadata"] = MetadataField({"words": words})
         if tags is not None:
             labels, detect_tags, complex_flag_dict = self.extract_tags(tags)

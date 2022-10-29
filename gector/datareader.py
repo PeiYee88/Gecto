@@ -53,7 +53,8 @@ class Seq2LabelsDatasetReader(DatasetReader):
                  tp_prob: float = 0,
                  broken_dot_strategy: str = "keep") -> None:
         super().__init__(lazy)
-        self._token_indexers = token_indexers or {'tokens': SingleIdTokenIndexer()}
+        self._token_indexers = token_indexers or {
+            'tokens': SingleIdTokenIndexer()}
         self._delimeters = delimeters
         self._max_len = max_len
         self._skip_correct = skip_correct
@@ -69,7 +70,8 @@ class Seq2LabelsDatasetReader(DatasetReader):
         # if `file_path` is a URL, redirect to the cache
         file_path = cached_path(file_path)
         with open(file_path, "r") as data_file:
-            logger.info("Reading instances from lines in file at: %s", file_path)
+            logger.info(
+                "Reading instances from lines in file at: %s", file_path)
             for line in data_file:
                 line = line.strip("\n")
                 # skip blank and broken lines
@@ -117,7 +119,8 @@ class Seq2LabelsDatasetReader(DatasetReader):
         else:
             raise Exception("Incorrect tag strategy")
 
-        detect_tags = ["CORRECT" if label == "$KEEP" else "INCORRECT" for label in labels]
+        detect_tags = ["CORRECT" if label ==
+                       "$KEEP" else "INCORRECT" for label in labels]
         return labels, detect_tags, comlex_flag_dict
 
     def text_to_instance(self, tokens: List[Token], tags: List[str] = None,

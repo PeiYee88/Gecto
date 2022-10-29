@@ -19,7 +19,6 @@ import nltk
 nltk.download('averaged_perceptron_tagger')
 
 
-
 def fix_seed():
     torch.manual_seed(1)
     torch.backends.cudnn.enabled = False
@@ -81,7 +80,8 @@ def get_model(model_name, vocab, tune_bert=False,
               label_smoothing=0.0,
               confidence=0,
               special_tokens_fix=0):
-    token_embs = get_token_embedders(model_name, tune_bert=tune_bert, special_tokens_fix=special_tokens_fix)
+    token_embs = get_token_embedders(
+        model_name, tune_bert=tune_bert, special_tokens_fix=special_tokens_fix)
     model = Seq2Labels(vocab=vocab,
                        text_field_embedder=token_embs,
                        predictor_dropout=predictor_dropout,
@@ -89,12 +89,14 @@ def get_model(model_name, vocab, tune_bert=False,
                        confidence=confidence)
     return model
 
+
 def main(args):
     fix_seed()
     if not os.path.exists(args.model_dir):
         os.mkdir(args.model_dir)
 
-    weights_name = get_weights_name(args.transformer_model, args.lowercase_tokens)
+    weights_name = get_weights_name(
+        args.transformer_model, args.lowercase_tokens)
     # read datasets
     reader = get_data_reader(weights_name, args.max_len, skip_correct=bool(args.skip_correct),
                              skip_complex=args.skip_complex,
@@ -108,36 +110,6 @@ def main(args):
 
     train_data = reader.read(args.train_set)
     dev_data = reader.read(args.dev_set)
-
-    def pos_tagger_and_tensor():
-        # read the training data in src format
-        f = open(args.postagger_train, "r")
-        pos_train = str(f.read())
-        #print(pos_train)
-
-        tokens = word_tokenize(pos_train)
-        tags = nltk.pos_tag(tokens)
-        #print(tags)
-
-        # a temporary list to store the string labels
-        temp_list = tags
-
-        # dictionary that maps integer to its string value
-        label_dict = {}
-
-        # list to store integer labels
-        int_labels = []
-
-        for i in range(len(temp_list)):
-            label_dict[i] = temp_list[i]
-            int_labels.append(i)
-
-        train_y = torch.tensor(int_labels)
-        return train_y
-
-    int_label_tensor = pos_tagger_and_tensor()
-    #print(token_with_tags)
-    
 
     default_tokens = [DEFAULT_OOV_TOKEN, DEFAULT_PADDING_TOKEN]
     namespaces = ['labels', 'd_tags']
@@ -171,7 +143,8 @@ def main(args):
 
     if args.pretrain:
         model.load_state_dict(
-            torch.load(os.path.join(args.pretrain_folder, args.pretrain + '.th')),
+            torch.load(os.path.join(
+                args.pretrain_folder, args.pretrain + '.th')),
             strict=False,
         )
 
@@ -233,7 +206,6 @@ if __name__ == '__main__':
                         help='Path to the dev data', required=True)
     parser.add_argument('--model_dir',
                         help='Path to the model dir', required=True)
-    parser.add_argument('--postagger_train', required=True)
     parser.add_argument('--vocab_path',
                         help='Path to the model vocabulary directory.'
                              'If not set then build vocab from data',

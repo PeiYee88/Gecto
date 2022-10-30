@@ -135,11 +135,15 @@ class Seq2LabelsDatasetReader(DatasetReader):
         fields["tokens"] = sequence
 
         # QIAN: ADDED THIS
-        pos_tags: List[Token] = []
+        sentence = []
         for token in tokens:
             word = token.text
-            pos_tag = nltk.pos_tag([word])[0][1]
-            pos_tags.append(Token(pos_tag))
+            sentence.append(word)
+
+        pos_tags: List[Token] = []
+        tagged_sentence = nltk.pos_tag(sentence)
+        for _, t in tagged_sentence:
+            pos_tags.append(Token(t))
         pos_tag_sequence = TextField(pos_tags, self._token_indexers)
         fields["pos_tags"] = pos_tag_sequence
 

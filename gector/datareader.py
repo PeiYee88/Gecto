@@ -11,6 +11,7 @@ from allennlp.data.instance import Instance
 from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
 from allennlp.data.tokenizers import Token
 from overrides import overrides
+import nltk
 
 from utils.helpers import SEQ_DELIMETERS, START_TOKEN
 
@@ -53,7 +54,8 @@ class Seq2LabelsDatasetReader(DatasetReader):
                  tp_prob: float = 0,
                  broken_dot_strategy: str = "keep") -> None:
         super().__init__(lazy)
-        self._token_indexers = token_indexers or {'tokens': SingleIdTokenIndexer()}
+        self._token_indexers = token_indexers or {
+            'tokens': SingleIdTokenIndexer()}
         self._delimeters = delimeters
         self._max_len = max_len
         self._skip_correct = skip_correct
@@ -69,7 +71,8 @@ class Seq2LabelsDatasetReader(DatasetReader):
         # if `file_path` is a URL, redirect to the cache
         file_path = cached_path(file_path)
         with open(file_path, "r") as data_file:
-            logger.info("Reading instances from lines in file at: %s", file_path)
+            logger.info(
+                "Reading instances from lines in file at: %s", file_path)
             for line in data_file:
                 line = line.strip("\n")
                 # skip blank and broken lines
@@ -117,7 +120,8 @@ class Seq2LabelsDatasetReader(DatasetReader):
         else:
             raise Exception("Incorrect tag strategy")
 
-        detect_tags = ["CORRECT" if label == "$KEEP" else "INCORRECT" for label in labels]
+        detect_tags = ["CORRECT" if label ==
+                       "$KEEP" else "INCORRECT" for label in labels]
         return labels, detect_tags, comlex_flag_dict
 
     def text_to_instance(self, tokens: List[Token], tags: List[str] = None,
@@ -129,6 +133,16 @@ class Seq2LabelsDatasetReader(DatasetReader):
         fields: Dict[str, Field] = {}
         sequence = TextField(tokens, self._token_indexers)
         fields["tokens"] = sequence
+
+        # QIAN: ADDED THIS
+        pos_tags: List[Token] = []
+        for token in tokens:
+            word = token.text
+            pos_tag = nltk.pos_tag([word])[0][1]
+            pos_tags.append(Token(pos_tag))
+        pos_tag_sequence = TextField(pos_tags, self._token_indexers)
+        fields["pos_tags"] = pos_tag_sequence
+
         fields["metadata"] = MetadataField({"words": words})
         if tags is not None:
             labels, detect_tags, complex_flag_dict = self.extract_tags(tags)

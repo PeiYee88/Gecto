@@ -76,7 +76,8 @@ class Seq2Labels(Model):
                                                        namespace=detect_namespace)
 
         self._verbose_metrics = verbose_metrics
-        self.predictor_dropout = TimeDistributed(torch.nn.Dropout(predictor_dropout))
+        self.predictor_dropout = TimeDistributed(
+            torch.nn.Dropout(predictor_dropout))
 
         self.tag_labels_projection_layer = TimeDistributed(
             Linear(text_field_embedder._token_embedders['bert'].get_output_dim(), self.num_labels_classes))
@@ -91,6 +92,7 @@ class Seq2Labels(Model):
     @overrides
     def forward(self,  # type: ignore
                 tokens: Dict[str, torch.LongTensor],
+                pos_tags: Dict[str, torch.LongTensor],
                 labels: torch.LongTensor = None,
                 d_tags: torch.LongTensor = None,
                 metadata: List[Dict[str, Any]] = None) -> Dict[str, torch.Tensor]:
@@ -129,10 +131,18 @@ class Seq2Labels(Model):
             A scalar loss to be optimised.
 
         """
+
+        # QIAN: UPDATED THIS PORTION
         encoded_text = self.text_field_embedder(tokens)
+        encoded_pos_tag = self.text_field_embedder(pos_tags)
+
+        # just sum word embeddings + pos tag embeddings
+        encoded_text = encoded_text + encoded_pos_tag
+
         batch_size, sequence_length, _ = encoded_text.size()
         mask = get_text_field_mask(tokens)
-        logits_labels = self.tag_labels_projection_layer(self.predictor_dropout(encoded_text))
+        logits_labels = self.tag_labels_projection_layer(
+            self.predictor_dropout(encoded_text))
         logits_d = self.tag_detect_projection_layer(encoded_text)
 
         class_probabilities_labels = F.softmax(logits_labels, dim=-1).view(
@@ -142,7 +152,8 @@ class Seq2Labels(Model):
         error_probs = class_probabilities_d[:, :, self.incorr_index] * mask
         incorr_prob = torch.max(error_probs, dim=-1)[0]
 
-        probability_change = [self.confidence, self.del_conf] + [0] * (self.num_labels_classes - 2)
+        probability_change = [self.confidence,
+                              self.del_conf] + [0] * (self.num_labels_classes - 2)
         class_probabilities_labels += torch.FloatTensor(probability_change).repeat(
             (batch_size, sequence_length, 1)).to(class_probabilities_labels.device)
 
@@ -174,7 +185,8 @@ class Seq2Labels(Model):
             all_predictions = output_dict[f'class_probabilities_{label_namespace}']
             all_predictions = all_predictions.cpu().data.numpy()
             if all_predictions.ndim == 3:
-                predictions_list = [all_predictions[i] for i in range(all_predictions.shape[0])]
+                predictions_list = [all_predictions[i]
+                                    for i in range(all_predictions.shape[0])]
             else:
                 predictions_list = [all_predictions]
             all_tags = []

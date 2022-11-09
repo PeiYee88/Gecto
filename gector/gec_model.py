@@ -4,6 +4,7 @@ import os
 import sys
 from time import time
 
+import nltk
 import torch
 from allennlp.data.dataset import Batch
 from allennlp.data.fields import TextField
@@ -179,7 +180,13 @@ class GecBERTModel(object):
             for sequence in token_batch:
                 tokens = sequence[:max_len]
                 tokens = [Token(token) for token in ['$START'] + tokens]
-                batch.append(Instance({'tokens': TextField(tokens, indexer)}))
+                sentence = ['$START'] + sequence[:max_len]
+                pos_tags: List[Token] = []
+                tagged_sentence = nltk.pos_tag(sentence)
+                for _, t in tagged_sentence:
+                    pos_tags.append(Token(t))
+                batch.append(Instance({'tokens': TextField(tokens, indexer), 'pos_tags': TextField(pos_tags, indexer)}))
+                #batch.append(Instance({'tokens': TextField(tokens, indexer)}))
             batch = Batch(batch)
             batch.index_instances(self.vocab)
             batches.append(batch)

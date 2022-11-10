@@ -1,5 +1,42 @@
-# CS4248 Project Group 12 - Modification 2
+# CS4248 Project Group 12 - Modification 2 (POS tags injection)
 
+### Instructions on running the model
+Note: This is a framework adapted from the AllenNLP package and original credits goes to: https://github.com/grammarly/gector
+
+To run the code first navigate into the gector-master directory
+
+Install all the required packages by:
+
+`pip install -r requirements.txt`
+
+Note: You might need updated version of VisualStudio C++
+
+The model takes in a set of processed dataset. For a given set of m2 files, you should expand the files to include a .src file and .tgt files using the m2 command (This has already been done for you).
+What is required next is to use the expanded files to generate an output file using the command:
+
+`python utils/preprocess_data.py -s SOURCE -t TARGET -o OUTPUT_FILE`
+
+These will be the files that your model will handle. We'll need a train set, a dev set and a test set for our experiments
+Note: For the purposes of this project, the bea19 dataset has been prepared for you to do the training.
+
+To train the model with non-limited word tokens (No restriction baseline model), run the following command:
+
+`python train.py --train_set TRAIN_SET --dev_set DEV_SET 
+                --model_dir MODEL_DIR`
+
+The model iterations would be dumped in the stated MODEL_DIR directory. (In this case it would be the dirmodels folder)
+
+To run the forward inference process of the model, you would need to call the predict.py script using the command.
+
+`python predict.py --model_path MODEL_PATH [MODEL_PATH ...] 
+                  --vocab_path VOCAB_PATH --input_file INPUT_FILE 
+                  --output_file OUTPUT_FILE`
+
+This would generate an output file which is the corrected text.
+
+Note that the current model in the dirmodels is trained using NUCLE dataset.
+
+---
 This repository provides code for training and testing state-of-the-art models for grammatical error correction with the official PyTorch implementation of the following paper:
 > [GECToR – Grammatical Error Correction: Tag, Not Rewrite](https://aclanthology.org/2020.bea-1.16/) <br>
 > [Kostiantyn Omelianchuk](https://github.com/komelianchuk), [Vitaliy Atrasevych](https://github.com/atrasevych), [Artem Chernodub](https://github.com/achernodub), [Oleksandr Skurzhanskyi](https://github.com/skurzhanskyi) <br>
@@ -7,9 +44,6 @@ This repository provides code for training and testing state-of-the-art models f
 > [15th Workshop on Innovative Use of NLP for Building Educational Applications (co-located with ACL 2020)](https://sig-edu.org/bea/2020) <br>
 
 It is mainly based on `AllenNLP` and `transformers`.
-
-### Modification
-Running a POS tagger in parallel and concatenate the POS encodings with token encodings during training. 
 
 ## Installation
 The following command installs all necessary packages:

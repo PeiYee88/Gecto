@@ -7,6 +7,10 @@ This repository provides code for training and testing state-of-the-art models f
 > [15th Workshop on Innovative Use of NLP for Building Educational Applications (co-located with ACL 2020)](https://sig-edu.org/bea/2020) <br>
 
 It is mainly based on `AllenNLP` and `transformers`.
+
+### Modification
+Running a POS tagger in parallel and concatenate the POS encodings with token encodings during training. 
+
 ## Installation
 The following command installs all necessary packages:
 ```.bash

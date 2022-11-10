@@ -34,8 +34,9 @@ To run the forward inference process of the model, you would need to call the pr
 
 This would generate an output file which is the corrected text.
 
-Note that the current model is trained using NUCLE dataset.
-You can find the trained model [here](https://drive.google.com/file/d/1J9_-XEcSPHrgBieYYxIvyI0NeElj42hu/view?usp=sharing).
+Note that the current model is trained using FCE, Wi-Locness, NUCLE dataset.
+You can find the trained model [here](https://drive.google.com/drive/folders/1wM06Z8_i8fZSEVBxH1xt_Wka_p1sNh7h?usp=sharing).
+
 
 ---
 This repository provides code for training and testing state-of-the-art models for grammatical error correction with the official PyTorch implementation of the following paper:

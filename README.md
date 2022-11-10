@@ -34,7 +34,7 @@ To run the forward inference process of the model, you would need to call the pr
 
 This would generate an output file which is the corrected text.
 
-Note that the current model in the dirmodels is trained using NUCLE dataset.
+Note that the current model in the dirmodels folder is trained using NUCLE dataset.
 
 ---
 This repository provides code for training and testing state-of-the-art models for grammatical error correction with the official PyTorch implementation of the following paper:
